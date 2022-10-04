@@ -13,7 +13,11 @@ config();
 const app = express();
 const PORT = process.env.PORT;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://super-shlomo-front.onrender.com",
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
