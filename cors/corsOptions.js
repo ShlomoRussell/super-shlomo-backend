@@ -1,4 +1,4 @@
-import { allowedOrigins } from "./allowedOrigins";
+import { allowedOrigins } from "./allowedOrigins.js";
 
 export const corsOptions = {
     origin: (origin, callback) => {
@@ -7,5 +7,5 @@ export const corsOptions = {
         }
         else callback(new Error('Not allow by cors'))
     }
-    
+
 }
