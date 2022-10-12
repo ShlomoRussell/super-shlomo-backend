@@ -16,17 +16,21 @@ const shoppingCartSchema = new Schema({
 });
 
 const ShoppingCartModel = model("cart", shoppingCartSchema);
-export async function deleteCart(customerId) {
-  return ShoppingCartModel.deleteOne({ customerId });
+
+export async function deleteCart(customerId, dateCreated) {
+  return ShoppingCartModel.deleteOne({ customerId, dateCreated });
 }
 
-export async function findCart(customerId) {
-  return ShoppingCartModel.find({ customerId });
+export async function findLatestCart(customerId) {
+  return ShoppingCartModel.find({ customerId })
+    .sort({ dateCreated: -1 })
+    .limit(1);
 }
 
 export async function createCart(newCart) {
   return ShoppingCartModel.insertMany(newCart);
 }
+
 const checkIfItemExists = async (customerId, itemId) => {
   const items = await ShoppingCartModel.find({ customerId }).select({
     items: 1,
@@ -86,33 +90,3 @@ export async function deleteAllOfOneItemType(itemId, customerId) {
     }
   );
 }
-
-// export async function findCartItemsMapped(customerId) {
-//   console.log(customerId)
-//   return ShoppingCartModel.aggregate([
-//     { $match: { customerId } },
-//     {
-//       $lookup: {
-//         from: "items", // collection name in db
-//         localField: "items",
-//         foreignField: "_id",
-//         let: { orders_drink: "$itemId" },
-//         pipeline: [
-//           {
-//             $match: {
-//               $expr: { $in: ["$$orders_drink", "$items"] },
-//             },
-//           },
-//         ],
-//         as: "cartItemsMapped",
-//       },
-//     },
-//     {
-//       $replaceRoot: {
-//         newRoot: {
-//           $mergeObjects: [{ $arrayElemAt: ["$cartItemsMapped", 0] }, "$$ROOT"],
-//         },
-//       },
-//     },
-//   ]);
-// }
