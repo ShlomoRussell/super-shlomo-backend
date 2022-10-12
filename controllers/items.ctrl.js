@@ -2,7 +2,7 @@ import { Router } from "express";
 import fileUpload from "express-fileupload";
 import { v4 as uuidv4 } from "uuid";
 import { join } from "path";
-import { addItem, getAllItems, getItem } from "../bls/items.bl.js";
+import { addItem, editItem, getAllItems } from "../bls/items.bl.js";
 import { getCategories } from "../dals/items.schema.js";
 
 const itemsRouter = Router();
@@ -50,13 +50,31 @@ itemsRouter.post("/addItem", async (req, res) => {
   }
 });
 
-itemsRouter.get("/:item", async (req, res) => {
+itemsRouter.put("/editItem", async (req, res) => {
+  let newFileName;
+  if (req.files) {
+    const uploadedfile = req.files.picture;
+    const originalFileExtension = uploadedfile.name.split(".")[1];
+    const fileExtension =
+      originalFileExtension == "jfif" ? "jpeg" : originalFileExtension;
+    newFileName = uuidv4() + "." + fileExtension;
+    const uploadPath = join(process.cwd(), "/uploads/", newFileName);
+
+    uploadedfile.mv(uploadPath, function (err) {
+      if (err) return res.status(500).send(err);
+    });
+  }
   try {
-    const item = await getItem(req.params.item);
-    return res.send(item);
+    const newItem = await editItem(
+      newFileName ? { ...req.body, picture: newFileName } : req.body
+    );
+    return res.send(newItem);
   } catch (error) {
+    console.log(error);
     return res.sendStatus(500);
   }
 });
+
+
 
 export default itemsRouter;
