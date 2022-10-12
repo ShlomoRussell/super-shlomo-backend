@@ -1,7 +1,7 @@
 import {
   createCart,
   deleteCart,
-  findCart,
+  findLatestCart,
   insertToCart,
 } from "../dals/shoppingCart.schema.js";
 import {
@@ -11,20 +11,21 @@ import {
 
 export async function getCart(customerId) {
   try {
-    const cart = await findCart(customerId);
+    const cart = await findLatestCart(customerId);
 
-    //if there no existing cart create new one
+    // if there no existing cart create new one
     if (cart.length === 0) {
-      try {
-        const newCart = await createCart({
-          customerId,
-          dateCreated: new Date(),
-        });
-        return new ShoppingCartModel(newCart[0]);
-      } catch (error) {
-        throw new Error(error.message);
-      }
+      return createNewCart(customerId);
     }
+
+    // if the cart that was open from the last time the customer visited the site 
+    // has nothing in it then delete the old cart and return a new cart
+    if (cart[0].items.length === 0) {
+      await deleteCart(customerId, cart[0].dateCreated);
+      return createNewCart(customerId);
+    }
+  
+    // return a cart that was open from a previous visit 
     return new ShoppingCartModel(cart[0]);
   } catch (error) {
     console.log(error);
@@ -32,10 +33,13 @@ export async function getCart(customerId) {
   }
 }
 
-export async function createNewCart(newCart) {
+export async function createNewCart(customerId) {
   try {
-    const cart = await createCart(newCart);
-    return new ShoppingCartModel(cart[0]);
+    const newCart = await createCart({
+      customerId,
+      dateCreated: new Date(),
+    });
+    return new ShoppingCartModel(newCart[0]);
   } catch (error) {
     throw new Error(error.message);
   }
