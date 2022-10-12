@@ -18,3 +18,8 @@ const OrderModel = model("order", orderSchema);
 export async function insertOrder(order) {
   return OrderModel.insertMany(order);
 }
+
+
+export async function findOrder(cartId) {
+  return OrderModel.find({cartId})
+}
