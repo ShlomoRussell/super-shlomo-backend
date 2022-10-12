@@ -1,4 +1,9 @@
-import { findAllItems, findOneItem, insertItem } from "../dals/items.schema.js";
+import {
+  findAllItems,
+  findOneItem,
+  insertItem,
+  updateItem,
+} from "../dals/items.schema.js";
 import ItemsModel from "../models/items.model.js";
 
 export async function getAllItems() {
@@ -10,20 +15,26 @@ export async function getAllItems() {
   }
 }
 
-export async function addItem(newUser) {
+export async function addItem(newItem) {
   try {
-    const item = await insertItem(newUser);
+    const item = await insertItem(newItem);
     return new ItemsModel(item[0]);
   } catch (error) {
     throw new Error(error.message);
   }
 }
 
-export async function getItem(itemName) {
+export async function editItem(updatedItem) {
   try {
-    const item = await findOneItem(itemName);
-    return new ItemsModel(item);
+    const updated = await updateItem(updatedItem);
+    if (updated.modifiedCount > 0) {
+      const item = await findOneItem(updatedItem.id);
+      return new ItemsModel(item[0]);
+    }
+    throw new Error("Item not updated");
   } catch (error) {
     throw new Error(error.message);
   }
 }
+
+
