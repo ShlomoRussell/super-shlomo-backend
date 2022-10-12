@@ -1,1 +1,0 @@
-export const allowedOrigins = ["https://super-shlomo-front.onrender.com/",'http://localhost:4200/'];
