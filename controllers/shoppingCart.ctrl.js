@@ -17,14 +17,14 @@ shoppingCartRouter.get("/", async (req, res) => {
   }
 });
 
-// shoppingCartRouter.get('/cartItemsMapped', async (req, res) => {
-//   try {
-//     const cartItemsMapped = await findCartItemsMapped(req.body.customerId)
-//    return res.send(cartItemsMapped)
-//   } catch (error) {
-//     return res.sendStatus(500)
-//   }
-// })
+shoppingCartRouter.get("/newCart", async (req, res) => {
+  try {
+    const cart = await createNewCart(req.headers.id);
+    return res.send(cart);
+  } catch (error) {
+    return res.sendStatus(500);
+  }
+});
 
 shoppingCartRouter.put("/addToCart", async (req, res) => {
   try {
