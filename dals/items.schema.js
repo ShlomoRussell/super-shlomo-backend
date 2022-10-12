@@ -26,6 +26,10 @@ export async function insertItem(newItem) {
   return ItemsModel.insertMany(newItem);
 }
 
-export async function findOneItem(itemName) {
-  return ItemsModel.find({ productName: itemName });
+export async function updateItem(updatedItem) {
+  return ItemsModel.updateOne({ _id: updatedItem.id }, { ...updatedItem });
+}
+
+export async function findOneItem(itemId) {
+  return ItemsModel.find({ _id: itemId });
 }
