@@ -1,10 +1,14 @@
 import { Router } from "express";
 import { hash as _hash, compare } from "bcrypt";
 import { config } from "dotenv";
-import { getUserByUsernameOrEmail, addUser, getUserById } from "../bls/auth.bl.js";
+import {
+  getUserByUsernameOrEmail,
+  addUser,
+  getUserById,
+} from "../bls/auth.bl.js";
 import jwt from "jsonwebtoken";
 import { checkIfTeudatZehutExistAlready } from "../dals/users.schema.js";
-import jwtMiddleware from '../middlewares/jwtMiddleware.js'
+import jwtMiddleware from "../middlewares/jwtMiddleware.js";
 const authRoute = Router();
 config();
 const saltRounds = 10;
@@ -23,29 +27,24 @@ authRoute.get("/checkToken", jwtMiddleware, async (req, res) => {
 });
 
 authRoute.post("/login", async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, password } = req.body;
   try {
-    const user = await getUserByUsernameOrEmail(username, email);
-    if (user === undefined)
-      throw new Error(`${username ? "username" : "email"} not found!`);
+    const user = await getUserByUsernameOrEmail(username);
 
     const result = await compare(password, user.password);
     console.log(user);
     if (!result) return res.status(404).send("Incorrect password!");
 
-    const token = jwt.sign(
-      { username: req.body.username, id: user.id },
-      process.env.SECRET_KEY
-    );
+    const token = jwt.sign({ username, id: user.id }, process.env.SECRET_KEY);
     delete user.password;
     res.status(201).json({ ...user, token });
   } catch (error) {
-    console.log(error);
-    return res.status(404).send(error.message);
+    if (error.message === "username not found") {
+      return res.status(404).send(error.message);
+    }
+    return res.sendStatus(500);
   }
 });
-
-
 
 authRoute.post("/register", async (req, res) => {
   const hash = await _hash(req.body.password, saltRounds);
@@ -73,7 +72,6 @@ authRoute.post("/register", async (req, res) => {
     return res.sendStatus(500);
   }
 });
-
 
 authRoute.post("/checkForTeudatZehut", async (req, res) => {
   try {
