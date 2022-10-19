@@ -39,7 +39,7 @@ authRoute.post("/login", async (req, res) => {
     delete user.password;
     res.status(201).json({ ...user, token });
   } catch (error) {
-    if (error.message === "username not found") {
+    if (error.message === "username not found!") {
       return res.status(404).send(error.message);
     }
     return res.sendStatus(500);
@@ -78,7 +78,9 @@ authRoute.post("/checkForTeudatZehut", async (req, res) => {
     const userExists = await checkIfTeudatZehutExistAlready(
       req.body.teudatZehut
     );
-    if (userExists.length === 0) return res.send(true);
+    if (userExists.length === 0) {
+      return res.send(true);
+    }
     return res.status(409).send("Teudat Zehut Already Exists!");
   } catch (error) {
     return res.status(500).send(error.message);
