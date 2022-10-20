@@ -5,7 +5,7 @@ const { Schema, model } = mongoose;
 const orderSchema = new Schema({
   customerId: { type: String, required: true },
   cartId: { type: String, required: true },
-  totalPrice: { type:Number, get: getPrice, set: setPrice, required: true },
+  totalPrice: { type: Number, get: getPrice, set: setPrice, required: true },
   city: { type: String, required: true },
   street: { type: String, required: true },
   deliveryDate: { type: Date, required: true },
@@ -19,7 +19,16 @@ export async function insertOrder(order) {
   return OrderModel.insertMany(order);
 }
 
-
 export async function findOrder(cartId) {
-  return OrderModel.find({cartId})
+  return OrderModel.find({ cartId });
+}
+
+export async function getCount() {
+  return OrderModel.count({});
+}
+
+export async function findLastPurchase(customerId) {
+  return OrderModel.find({ customerId })
+    .sort({ orderedDate: "desc", _id: -1 })
+    .limit(1);
 }
