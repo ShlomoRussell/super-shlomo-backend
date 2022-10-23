@@ -27,8 +27,9 @@ shoppingCartRouter.get("/newCart", async (req, res) => {
 });
 
 shoppingCartRouter.put("/addToCart", async (req, res) => {
+  console.log(req.body)
   try {
-    const cart = await addtoCart(req.body, req.headers.id);
+    const cart = await addtoCart(req.body.item,req.body.cartId);
     return res.send(cart);
   } catch (error) {
     return res.sendStatus(500);
@@ -49,7 +50,7 @@ shoppingCartRouter.delete("/", async (req, res) => {
 
 shoppingCartRouter.delete("/oneItem", async (req, res) => {
   try {
-    const deleted = await deleteOneItem(req.body.itemId, req.headers.id);
+    const deleted = await deleteOneItem(req.body.itemId, req.body.cartId);
     if (deleted.modifiedCount > 0) {
       return res.send(true);
     } else throw new Error();
@@ -63,7 +64,7 @@ shoppingCartRouter.delete("/allOfItemType", async (req, res) => {
   try {
     const deleted = await deleteAllOfOneItemType(
       req.body.itemId,
-      req.headers.id
+      req.body.cartId
     );
     console.log(deleted);
     if (deleted.modifiedCount > 0) {

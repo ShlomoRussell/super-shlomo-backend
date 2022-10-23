@@ -12,7 +12,7 @@ import {
 export async function getCart(customerId) {
   try {
     const cart = await findLatestCart(customerId);
-
+console.log(cart)
     // if there no existing cart create new one
     if (cart.length === 0) {
       return createNewCart(customerId);
@@ -20,7 +20,8 @@ export async function getCart(customerId) {
 
     // if the cart that was open from the last time the customer visited the site 
     // has nothing in it then delete the old cart and return a new cart
-    if (cart[0].items.length === 0) {
+    if (!cart[0].items.length) {
+      console.log('yes')
       await deleteCart(customerId, cart[0].dateCreated);
       return createNewCart(customerId);
     }
@@ -45,9 +46,9 @@ export async function createNewCart(customerId) {
   }
 }
 
-export async function addtoCart(newItem, customerId) {
+export async function addtoCart(newItem, cartId) {
   try {
-    const item = await insertToCart(newItem, customerId);
+    const item = await insertToCart(newItem, cartId);
     return new ShoppingCartItems(newItem);
   } catch (error) {
     console.log(error);

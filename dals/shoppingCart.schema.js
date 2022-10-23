@@ -23,16 +23,16 @@ export async function deleteCart(customerId, dateCreated) {
 
 export async function findLatestCart(customerId) {
   return ShoppingCartModel.find({ customerId })
-    .sort({ dateCreated: -1 })
-    .limit(1);
+    .limit(1)
+    .sort({ dateCreated: -1 });
 }
 
 export async function createCart(newCart) {
   return ShoppingCartModel.insertMany(newCart);
 }
 
-const checkIfItemExists = async (customerId, itemId) => {
-  const items = await ShoppingCartModel.find({ customerId }).select({
+const checkIfItemExists = async (cartId, itemId) => {
+  const items = await ShoppingCartModel.find({ _id: cartId }).select({
     items: 1,
     _id: 0,
   });
@@ -42,10 +42,10 @@ const checkIfItemExists = async (customerId, itemId) => {
   return null;
 };
 
-const updateOneItemQuantity = async (customerId, newItem) =>
+const updateOneItemQuantity = async (cartId, newItem) =>
   ShoppingCartModel.updateOne(
     {
-      customerId,
+      _id: cartId,
       "items.itemId": newItem.itemId,
     },
     {
@@ -56,33 +56,33 @@ const updateOneItemQuantity = async (customerId, newItem) =>
     }
   );
 
-export async function insertToCart(newItem, customerId) {
-  const itemExists = await checkIfItemExists(customerId, newItem.itemId);
+export async function insertToCart(newItem, cartId) {
+  const itemExists = await checkIfItemExists(cartId, newItem.itemId);
   if (itemExists) {
-    return updateOneItemQuantity(customerId, newItem);
+    return updateOneItemQuantity(cartId, newItem);
   }
   return ShoppingCartModel.updateOne(
-    { customerId },
+    { _id: cartId },
     { $push: { items: newItem } }
   );
 }
 
-export async function deleteOneItem(itemId, customerId) {
-  const { quantity, totalPrice } = await checkIfItemExists(customerId, itemId);
+export async function deleteOneItem(itemId, cartId) {
+  const { quantity, totalPrice } = await checkIfItemExists(cartId, itemId);
 
   if (quantity > 1) {
-    return updateOneItemQuantity(customerId, {
+    return updateOneItemQuantity(cartId, {
       quantity: -1,
       totalPrice: -(totalPrice / quantity),
       itemId,
     });
   }
-  return deleteAllOfOneItemType(itemId, customerId);
+  return deleteAllOfOneItemType(itemId, cartId);
 }
 
-export async function deleteAllOfOneItemType(itemId, customerId) {
+export async function deleteAllOfOneItemType(itemId, cartId) {
   return ShoppingCartModel.updateOne(
-    { customerId },
+    { _id:cartId },
     {
       $pull: {
         items: { itemId },
